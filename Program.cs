@@ -113,8 +113,24 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
-    SeedData.Initialize(services);
+    // Seed chỉ chạy khi DEV hoặc bạn bật RUN_SEED=true trên Render
+    var runSeed = app.Environment.IsDevelopment() ||
+                 string.Equals(Environment.GetEnvironmentVariable("RUN_SEED"), "true",
+                               StringComparison.OrdinalIgnoreCase);
+
+    if (runSeed)
+    {
+        try
+        {
+            SeedData.Initialize(services);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Seed failed: " + ex);
+        }
+    }
 }
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
