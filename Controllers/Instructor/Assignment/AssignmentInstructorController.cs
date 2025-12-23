@@ -227,9 +227,9 @@ namespace BTL_QuanLyLopHocTrucTuyen.Controllers
 
             try
             {
-                assignment.IsPublic = !assignment.IsPublic;
+                assignment.bDisabled = !assignment.bDisabled;
                 await _assignmentRepository.UpdateAsync(assignment);
-                return Json(new { success = true, isPublic = assignment.IsPublic });
+                return Json(new { success = true, isPublic = assignment.bDisabled });
             }
             catch (Exception ex)
             {

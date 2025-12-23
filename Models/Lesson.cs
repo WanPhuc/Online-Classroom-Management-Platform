@@ -50,5 +50,10 @@ namespace BTL_QuanLyLopHocTrucTuyen.Models
 
         [JsonIgnore]
         public virtual ICollection<Material> Materials { get; set; } = new List<Material>();
+
+        [Required(ErrorMessage = "Vui lòng nhập VerifyKey")]
+        [StringLength(50, MinimumLength = 10, ErrorMessage = "VerifyKey phải có đúng 10 ký tự")]
+        [RegularExpression(@"^[0-9][A-Za-z0-9]{9}$", ErrorMessage = "VerifyKey phải bắt đầu bằng số và có 10 ký tự")]
+        public string VerifyKey { get; set; }
     }
 }

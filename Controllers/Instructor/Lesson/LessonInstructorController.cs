@@ -23,30 +23,42 @@ namespace BTL_QuanLyLopHocTrucTuyen.Controllers
             _courseRepository = courseRepository;
         }
 
-        // ✅ Hiển thị danh sách bài học của khóa học đang chọn
         [HttpGet]
         public async Task<IActionResult> Lesson()
         {
-            // 🔹 Nếu chưa chọn khóa học thì chuyển về trang chọn
             var redirect = EnsureCourseSelected();
             if (redirect != null) return redirect;
 
-            // 🔹 Lấy ID khóa học từ Claim
             var courseId = GetCurrentCourseId()!.Value;
 
-            // 🔹 Lấy danh sách bài học của khóa học
             var lessons = (await _lessonRepository.FindAsync())
                 .Where(l => l.CourseId == courseId)
                 .OrderByDescending(l => l.BeginTime)
                 .ToList();
 
-            // 🔹 Lấy thông tin khóa học để hiển thị
             var course = await _courseRepository.FindByIdAsync(courseId);
             ViewBag.CourseName = course?.Name ?? "Khóa học không xác định";
             ViewBag.CourseId = courseId;
 
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                string lastVisitTime = DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
+
+                Response.Cookies.Append(
+                    "LastVisit_Lesson",         
+                    lastVisitTime,              
+                    new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(7), 
+                        HttpOnly = true,                   
+                        Secure = false                    
+                    }
+                );
+            }
+
             return View("~/Views/Instructor/LessonInstructor/Lesson.cshtml", lessons);
         }
+
 
         // ✅ Chi tiết bài học
         [HttpGet]
@@ -202,7 +214,6 @@ namespace BTL_QuanLyLopHocTrucTuyen.Controllers
             return RedirectToAction(nameof(Lesson));
         }
 
-        // ✅ Xóa bài học
         [HttpDelete]
         public async Task<IActionResult> DeleteLesson(Guid id)
         {
@@ -216,5 +227,96 @@ namespace BTL_QuanLyLopHocTrucTuyen.Controllers
             await _lessonRepository.DeleteByIdAsync(id);
             return Json(new { success = true });
         }
+        // NewLesson
+        [HttpGet]
+        public async Task<IActionResult> NewLesson()
+        {
+            var lessons = await _lessonRepository.FindAsync();
+
+            foreach (var lesson in lessons)
+            {
+                if (!string.IsNullOrEmpty(lesson.VerifyKey))
+                {
+                    lesson.VerifyKey = DecodeBase64(lesson.VerifyKey);
+                }
+            }
+
+            var allLessons = lessons
+                .OrderByDescending(l => l.BeginTime)
+                .ToList();
+
+            return View("~/Views/Instructor/LessonInstructor/NewLesson.cshtml", allLessons);
+        }
+        [HttpGet]
+        public IActionResult AddNewLesson()
+        {
+            var redirect = EnsureCourseSelected();
+            if (redirect != null) return redirect;
+
+            return View("~/Views/Instructor/LessonInstructor/AddNewLesson.cshtml");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddNewLesson([FromForm] Lesson lesson)
+        {
+            var redirect = EnsureCourseSelected();
+            if (redirect != null) return redirect;
+
+            // ✅ Kiểm tra hợp lệ Model (đặc biệt là VerifyKey)
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                });
+            }
+
+            var courseId = GetCurrentCourseId()!.Value;
+            var currentCourse = await _courseRepository.FindByIdAsync(courseId);
+            if (currentCourse == null)
+                return Json(new { success = false, message = "❌ Không tìm thấy khóa học hiện tại!" });
+
+            // 🧠 Mã hóa VerifyKey trước khi lưu (Base64 hoặc custom)
+            lesson.VerifyKey = EncodeBase64(lesson.VerifyKey);
+
+            // 🔹 Thiết lập thông tin khác
+            lesson.Id = Guid.NewGuid();
+            lesson.CourseId = courseId;
+            lesson.Status = Models.Enums.ScheduleStatus.Planned;
+
+            await _lessonRepository.AddAsync(lesson);
+
+            return Json(new { success = true });
+        }
+        private string EncodeBase64(string plainText)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(bytes);
+        }
+
+        private string DecodeBase64(string base64Text)
+        {
+            var bytes = Convert.FromBase64String(base64Text);
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+        //viewcookie
+        [HttpGet]
+        public IActionResult ViewCookie()
+        {
+            string lastVisit = Request.Cookies["LastVisit_Lesson"];
+
+            if (string.IsNullOrEmpty(lastVisit))
+                ViewBag.CookieMessage = "Chưa có cookie nào được lưu.";
+            else
+                ViewBag.CookieMessage = $"Lần truy cập cuối cùng vào trang Lesson: {lastVisit}";
+
+            return View("~/Views/Instructor/LessonInstructor/ViewCookie.cshtml");
+        }
+
+
+
     }
 }

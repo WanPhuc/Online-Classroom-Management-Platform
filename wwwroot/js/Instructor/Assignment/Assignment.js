@@ -185,18 +185,18 @@ function getSortLabel(type) {
                     const badge = card.find(".assignment-status:first span");
                     if (res.isPublic) {
                         badge.removeClass("bg-secondary").addClass("bg-success")
-                             .html('<i class="bi bi-globe"></i> Công khai');
+                             .html('<i class="bi bi-globe"></i> Un disable');
                         btn.find("i").removeClass("bi-globe2").addClass("bi-lock");
-                        showToast("🌍 Bài tập đã công khai!");
+                        showToast("🌍 Bài tập đã Un disable!");
                     } else {
                         badge.removeClass("bg-success").addClass("bg-secondary")
-                             .html('<i class="bi bi-lock"></i> Không công khai');
+                             .html('<i class="bi bi-lock"></i> disable');
                         btn.find("i").removeClass("bi-lock").addClass("bi-globe2");
-                        showToast("🔒 Bài tập đã ẩn!");
+                        showToast("🔒 Bài tập đã disable!");
                     }
                 } else showToast(res.message || "Không thể cập nhật trạng thái!", true);
             },
-            error: () => showToast("❌ Lỗi khi cập nhật trạng thái công khai!", true)
+            error: () => showToast("❌ Lỗi khi cập nhật trạng thái disable!", true)
         });
     });
 

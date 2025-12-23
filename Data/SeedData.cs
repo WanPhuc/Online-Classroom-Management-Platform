@@ -235,7 +235,7 @@ public static class SeedData
                 //DueDate = DateTime.UtcNow.AddDays(7),
                 MaxScore = 100,
                 Type = "Homework",
-                IsPublic = true,
+                bDisabled = true,
                 CreatedAt = DateTime.UtcNow
             };
             context.Assignments.Add(assignment);

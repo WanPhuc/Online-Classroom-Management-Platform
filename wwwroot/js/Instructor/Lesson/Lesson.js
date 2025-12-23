@@ -1,6 +1,5 @@
 $(document).ready(function () {
     // 🔍 Tìm kiếm bài học theo tiêu đề
-    // 🔍 Tìm kiếm bài học theo tiêu đề (hỗ trợ tiếng Việt có dấu)
     $(".search-lesson").on("input", function () {
         const keyword = removeVietnameseTones($(this).val().toLowerCase().trim());
 
@@ -9,7 +8,6 @@ $(document).ready(function () {
             $(this).toggle(title.includes(keyword));
         });
     });
-
     // 🔠 Hàm loại bỏ dấu tiếng Việt
     function removeVietnameseTones(str) {
         return str
@@ -18,9 +16,6 @@ $(document).ready(function () {
             .replace(/đ/g, "d")               // thay đ → d
             .replace(/Đ/g, "d");              // thay Đ → d
     }
-
-
-
     // 🗑️ Khi bấm nút Xóa bài học
     $(".btn-delete").on("click", function () {
         const lessonId = $(this).data("id");
@@ -51,7 +46,6 @@ $(document).ready(function () {
             });
         }
     });
-
     // 🔔 Hàm hiển thị thông báo nhỏ (toast)
     function showToast(message, isError = false) {
         const toast = $("<div></div>")
@@ -74,6 +68,4 @@ $(document).ready(function () {
             .delay(2000)
             .fadeOut(500, function () { $(this).remove(); });
     }
-    
-
 });

@@ -70,73 +70,94 @@ $(document).ready(function () {
     // ======================== ASSIGNMENT ========================
 
     function filterAssignments(keyword) {
-        const lower = keyword.toLowerCase();
-        let visible = 0;
-        $assignmentDropdown.find("li").each(function () {
-            const text = $(this).text().toLowerCase();
-            const match = text.includes(lower);
-            $(this).toggle(match);
-            if (match) visible++;
-        });
-        if (visible === 0) {
-            if ($assignmentDropdown.find(".no-result").length === 0) {
-                $assignmentDropdown.append(
-                    '<li class="list-group-item text-muted text-center fst-italic no-result">Không có bài tập</li>'
-                );
-            }
-        } else {
-            $assignmentDropdown.find(".no-result").remove();
+    const lower = keyword.toLowerCase();
+    let visible = 0;
+
+    $assignmentDropdown.find("li").each(function () {
+        const text = $(this).text().toLowerCase();
+        const match = text.includes(lower);
+        $(this).toggle(match);
+        if (match) visible++;
+    });
+
+    if (visible === 0) {
+        if ($assignmentDropdown.find(".no-result").length === 0) {
+            $assignmentDropdown.append(
+                '<li class="list-group-item text-muted text-center fst-italic no-result">Không có bài tập</li>'
+            );
         }
+    } else {
+        $assignmentDropdown.find(".no-result").remove();
     }
+}
 
     $assignmentSearch.on("focus input", function () {
-        filterAssignments($(this).val().trim());
-        $assignmentDropdown.show();
-    });
+    let keyword = $(this).val().trim();
 
-    // ✅ Khi chọn bài tập
-    $assignmentDropdown.on("click", "li", function () {
-        const id = $(this).data("id");
-        if (!id) return;
-        const name = $(this).text().trim();
+    const hasNumber = /\d/.test(keyword);
 
-        currentAssignmentId = id;
-        $assignmentSearch.val(name);
+    if (keyword.length < 3 || hasNumber) {
         $assignmentDropdown.hide();
-        $clearAssignment.show();
-        $assignmentDropdown.find("li").removeClass("active");
-        $(this).addClass("active");
 
-        // 🟢 Load bảng điểm cho bài tập cụ thể
-        loadGrades(currentCourseId, id);
+        if (hasNumber) {
+            $(this).addClass("is-invalid");
+            if (!$("#assignmentWarning").length) {
+                $(this)
+                    .after(
+                        '<div id="assignmentWarning" class="invalid-feedback d-block small text-danger mt-1">❌ Tên bài tập không được chứa số.</div>'
+                    );
+            }
+        } else {
+            $(this).removeClass("is-invalid");
+            $("#assignmentWarning").remove();
+        }
+
+        return; 
+    }
+
+    $(this).removeClass("is-invalid");
+    $("#assignmentWarning").remove();
+
+    filterAssignments(keyword);
+    $assignmentDropdown.show();
+});
+
+$assignmentDropdown.on("click", "li", function () {
+    const id = $(this).data("id");
+    if (!id) return;
+    const name = $(this).text().trim();
+
+    currentAssignmentId = id;
+    $assignmentSearch.val(name);
+    $assignmentDropdown.hide();
+    $clearAssignment.show();
+$assignmentDropdown.find("li").removeClass("active");
+$(this).addClass("active");
+
+loadGrades(currentCourseId, id);
+});
+
+$clearAssignment.on("mousedown", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setTimeout(() => {
+         $assignmentSearch.val("");
+           $clearAssignment.hide();
+         currentAssignmentId = "";
+         $assignmentDropdown.find("li").removeClass("active");
+         $assignmentDropdown.show();
+         $assignmentSearch.focus();
+
+         if (currentCourseId) loadGrades(currentCourseId, null);
+    }, 60);
     });
 
-    // ❌ Xóa bài tập
-    $clearAssignment.on("mousedown", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setTimeout(() => {
-            $assignmentSearch.val("");
-            $clearAssignment.hide();
-            currentAssignmentId = "";
-            $assignmentDropdown.find("li").removeClass("active");
-            $assignmentDropdown.show();
-            $assignmentSearch.focus();
+$(document).on("click", function (e) {
+    if (!$(e.target).closest(".filter-course").length) $courseDropdown.hide();
+    if (!$(e.target).closest(".filter-assignment").length) $assignmentDropdown.hide();
+});
 
-            // 🟢 Nếu xóa bài tập → load lại toàn bộ danh sách học viên trong khóa
-            if (currentCourseId) loadGrades(currentCourseId, null);
-        }, 60);
-    });
 
-    // Ẩn dropdown khi click ra ngoài
-    $(document).on("click", function (e) {
-        if (!$(e.target).closest(".filter-course").length) $courseDropdown.hide();
-        if (!$(e.target).closest(".filter-assignment").length) $assignmentDropdown.hide();
-    });
-
-    // ======================== AJAX ========================
-
-    // 🔹 Load danh sách bài tập
     function loadAssignments(courseId) {
         $.ajax({
             url: `/Instructor/Grade`,

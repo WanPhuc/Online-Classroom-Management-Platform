@@ -76,6 +76,8 @@ namespace BTL_QuanLyLopHocTrucTuyen.Controllers.API
             if (existingUser != null)
                 return Conflict(new { message = "Email này đã được sử dụng." });
 
+                
+
             var user = new User
             {
                 FullName = request.FullName,

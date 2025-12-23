@@ -1,0 +1,42 @@
+@model IEnumerable<BTL_QuanLyLopHocTrucTuyen.Models.Lesson>
+@{
+    ViewData["Title"] = "Danh sách tất cả bài học";
+    Layout = "~/Views/Instructor/Shared/_InstructorLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/Instructor/Lesson/NewLesson.css" asp-append-version="true" />
+
+<div class="content-main">
+    <h4 class="text-primary mb-3">
+        <i class="bi bi-grid me-2"></i>Danh sách tất cả bài học
+    </h4>
+    <a asp-controller="LessonInstructor" asp-action="AddNewLesson" >
+    </i>Thêm bài học mới
+    </a>
+
+    <div class="lesson-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var lesson in Model)
+            {
+                <div class="lesson-card">
+                    <h5>@lesson.Title</h5>
+                    <p><strong>Mô tả:</strong> @lesson.Content</p>
+                    <p><strong>VideoUrl:</strong>@lesson.VideoUrl</p>
+                    <p><strong>Thời gian:</strong> 
+                        @lesson.BeginTime.ToString("dd/MM/yyyy") - @lesson.EndTime.ToString("dd/MM/yyyy")
+                    </p>
+                    <p><strong>Khóa học:</strong> @lesson.Course?.Name</p>
+                    <p><strong>Tài liệu:</strong> @lesson.Materials?.Count()  | 
+                       <strong>Bài tập:</strong> @lesson.Assignments?.Count() </p>
+                    <p><strong>Verify Key:</strong> @lesson.VerifyKey</p>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted text-center">Chưa có bài học nào.</p>
+        }
+    </div>
+</div>
+

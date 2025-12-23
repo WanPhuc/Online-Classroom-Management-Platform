@@ -62,7 +62,7 @@ namespace BTL_QuanLyLopHocTrucTuyen.Models
 
         // ===== 🌍 TRẠNG THÁI =====
         [Display(Name = "Công khai cho sinh viên")]
-        public bool IsPublic { get; set; } = false;
+        public bool bDisabled { get; set; } = false;
 
         [NotMapped]
         [Display(Name = "Đã hết hạn")]

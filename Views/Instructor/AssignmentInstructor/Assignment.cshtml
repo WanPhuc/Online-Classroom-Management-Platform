@@ -81,16 +81,14 @@
                                             <span><i class="bi bi-tag"></i> Loại: @item.Type</span> 
                                         </div> 
                                 </div> 
-                                <div class="assignment-actions"> 
-                                    <!-- 🌍 Công khai --> 
-                                    <div class="assignment-status"> @if (item.IsPublic) { 
-                                        <span class="badge bg-success"> <i class="bi bi-globe"></i> Công khai </span> 
-                                        
-                                    } else { 
-                                        <span class="badge bg-secondary"> <i class="bi bi-lock"></i> Không công khai </span> 
-                                    } 
+                <div class="assignment-actions"> 
+                    <div class="assignment-status"> @if (item.bDisabled) { 
+                            <span class="badge bg-success"> <i class="bi bi-globe"></i> Disable </span> 
+                              
+                        } else { 
+                        <span class="badge bg-secondary"> <i class="bi bi-lock"></i> No Disable </span> 
+                     } 
                                 </div> 
-                                <!-- ⏰ Trạng thái hạn --> 
                                 <div class="assignment-status"> 
                                     @if (item.IsExpired) { 
                                         <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Đã hết hạn</span> 
@@ -98,12 +96,11 @@
                                         <span class="badge bg-primary"><i class="bi bi-check-circle"></i> Còn hạn</span> 
                                     } 
                                 </div> 
-                                <!-- 🧭 Các nút hành động --> 
                                 <div class="buttons"> 
                                     <a asp-action="EditAssignment" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Sửa"> <i class="bi bi-pencil"></i> </a> 
                                     <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="@item.Id" title="Xóa"> <i class="bi bi-trash"></i> </button> 
-                                    <button type="button" class="btn btn-sm btn-outline-success btn-public" data-id="@item.Id" title="Công khai / Ẩn"> 
-                                        <i class="bi @(item.IsPublic ? "bi-lock" : "bi-globe2")"></i> 
+                                <button type="button" class="btn btn-sm btn-outline-success btn-public" data-id="@item.Id" title="Disable/un disable"> 
+                                    <i class="bi @(item.bDisabled ? "bi-lock" : "bi-globe2")"></i> 
                                     </button> 
                                     @if (!string.IsNullOrEmpty(item.UploadedFileUrl))
                                     {
